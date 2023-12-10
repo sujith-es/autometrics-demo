@@ -66,8 +66,8 @@ services:
       - grafana-storage:/var/lib/grafana
       - ./backend-configs/grafana/grafana-bootstrap.ini:/etc/grafana/grafana.ini
       - ./backend-configs/grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
-      - ./backend-configs/grafana/dashboards:/var/lib/grafana/dashboards
-      - ./backend-configs/grafana/provisioning:/etc/grafana/provisioning
+      - ./backend-configs/grafana/dashboards/:/var/lib/grafana/dashboards
+      - ./backend-configs/grafana/provisioning/:/etc/grafana/provisioning
     ports:
       - "3000:3000"
     healthcheck:
