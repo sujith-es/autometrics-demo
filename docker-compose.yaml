@@ -1,0 +1,61 @@
+version: '3.0'
+
+volumes:
+  app-logs: {}
+  grafana-storage: {}
+
+services:
+
+  autometrics-demo-app:
+    build: .
+    image: autometrics-demo-app:latest
+    container_name: autometrics-demo-app
+    hostname: autometrics-demo-app
+    environment:
+      - SERVER_PORT=8080
+    depends_on:
+      - prometheus
+    ports:
+      - "8080:8080"
+    healthcheck:
+      interval: 5s
+      retries: 10
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8080/hello
+  #  am:
+  #    container_name: am
+  #    image: autometrics/am:latest
+  #    extra_hosts:
+  #      - host.docker.internal:host-gateway
+  ##    depends_on:
+  ##      - otel-collector
+  #    ports:
+  #      - "6789:6789"
+  ##      - "9090:9090"
+  #    command: "start http://otel-collector:9464/metrics host.docker.internal:9464 host.docker.internal:9465 host.docker.internal:9466"
+  #    environment:
+  #      - LISTEN_ADDRESS=0.0.0.0:6789
+  #    restart: unless-stopped
+  #    volumes:
+  #      - app-logs:/var/log
+
+  prometheus:
+    image: prom/prometheus:v2.39.2
+    container_name: prometheus
+    hostname: prometheus
+    command:
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./backend-configs/prometheus.yaml:/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+    healthcheck:
+      interval: 5s
+      retries: 10
+      test: wget --no-verbose --tries=1 --spider http://localhost:9090/status || exit 1
+
+
+networks:
+  default:
+    name: autometrics-java-poc
